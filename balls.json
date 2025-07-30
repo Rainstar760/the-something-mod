@@ -1,0 +1,18 @@
+{
+    "id": "something",
+    "name": "the something mod",
+    "display_name": "something",
+    "author": [
+        "Rainstar"
+    ],
+    "description": "a very random mod that exists",
+    "prefix": "r",
+    "main_file": "balls.lua",
+    "priority": 1e100,
+    "badge_colour": "",
+    "badge_text_colour": "",
+    "version": "1.0.0",
+    "dependencies": [
+        "Talisman"
+    ]
+}
