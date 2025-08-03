@@ -5,6 +5,7 @@ local files = {
 	"items/t4somc_jokers",
 	--"items/unbalanced_consumables",
 	"items/consumables",
+	"items/misc_jokers",
 	"items/cracked_jokers",
 	"items/boosters",
 	--"items/unbalanced_seals",

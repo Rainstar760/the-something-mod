@@ -395,6 +395,29 @@ SMODS.Joker {
 		end
 	end
 }
+SMODS.Joker {
+	key = 'zulu_2',
+	loc_txt = {
+		name = 'zulu but better',
+		text = {
+			"{C:valk_prestigious,s:5}+pi Zulu{}",
+		}
+	},
+	config = { extra = { zulu = math.pi } },
+	dependencies = {"vallkarri"},
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.zulu } }
+	end,
+	rarity = 'r_cracked',
+	atlas = 'placeholders',
+	pos = { x = 10, y = 0 },
+	cost = 500 * math.pi,
+	calculate = function(self, card, context)
+		if context.joker_main then
+        	G.GAME.zulu = (G.GAME.zulu and G.GAME.zulu+card.ability.extra.zulu) or (math.pi+card.ability.extra.zulu)
+		end
+	end
+}
 
 -- beyond cracked jokers
 SMODS.Joker {

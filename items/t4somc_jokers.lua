@@ -389,6 +389,52 @@ SMODS.Joker {
 	end
 }
 
+
+SMODS.Joker {
+	key = 'laser_sequence',
+	loc_txt = {
+		name = '{C:green}Laser Sequence{}',
+		text = {
+			"A random scoring card gives {X:chips,C:white}X#1#{} Chips",
+			"Every other scoring card that triggers after that gives",
+			"{X:chips,C:white}X#2#{} less Chips"
+		}
+	},
+	config = { extra = { xchips = 1.5, xchip_decrease = 0.1, random_card = 0 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.xchips, card.ability.extra.xchip_decrease } }
+	end,
+	rarity = 'r_shape',
+	atlas = 't4somcjokers_atlas',
+	pos = { x = 2, y = 1 },
+	cost = 10,
+	calculate = function(self, card, context)
+		if context.cardarea == G.play then
+			card.ability.extra.random_card = math.random(0, #context.scoring_hand)
+		end
+		if context.cardarea == G.play and context.individual then
+			for i = 0, (#context.scoring_hand - card.ability.extra.random_card) do
+				if context.other_card == context.scoring_hand[card.ability.extra.random_card] then
+				card.ability.extra.xchips = 1.5
+					return {
+						Xchip_mod = card.ability.extra.xchips,
+						message = "X" .. card.ability.extra.xchips .. " Chips",
+						colour = G.C.CHIPS
+					}
+				else if context.other_card == context.scoring_hand[card.ability.extra.random_card + i] then
+					card.ability.extra.xchips = math.max(card.ability.extra.xchips - card.ability.extra.xchip_decrease, 1)
+					return {
+						Xchip_mod = card.ability.extra.xchips,
+						message = "X" .. card.ability.extra.xchips .. " Chips",
+						colour = G.C.CHIPS
+					}
+				end
+			end
+		end
+	end
+	end
+}
+
 -- the triangulars
 SMODS.Joker {
 	key = 'triangle',
@@ -411,10 +457,10 @@ SMODS.Joker {
 		if context.cardarea == G.play then
 			if math.fmod(#context.scoring_hand, 2) == 0 then
 				card.ability.extra.middle_card = #context.scoring_hand / 2
-				print("wow! " .. #context.scoring_hand .. " cards and the middle one is the " .. card.ability.extra.middle_card .. "th one !")
+				--print("wow! " .. #context.scoring_hand .. " cards and the middle one is the " .. card.ability.extra.middle_card .. "th one !")
 			else if math.fmod(#context.scoring_hand, 2) == 1 then
 				card.ability.extra.middle_card = (#context.scoring_hand / 2) + 0.5
-				print("wow! " .. #context.scoring_hand .. " cards and the middle one is the " .. card.ability.extra.middle_card .. "th one !")
+				--print("wow! " .. #context.scoring_hand .. " cards and the middle one is the " .. card.ability.extra.middle_card .. "th one !")
 			end
 		end
 		if context.individual and context.cardarea == G.play then 
@@ -495,7 +541,7 @@ SMODS.Joker {
 			"{C:red}Fixed{} {C:attention}1 in 10{} chance to {X:dark_edition,C:edition,s:1.5}corrupt...{}"
 		}
 	},
-	config = { extra = { amount = 1, xchipmult = 2, multiplier = 4 } },
+	config = { extra = { amount = 1, xchipmult = 2, multiplier = 4, active = false } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.amount, card.ability.extra.xchipmult, card.ability.extra.multiplier } }
 	end,
@@ -672,7 +718,7 @@ SMODS.Joker {
 		info_queue[#info_queue + 1] = G.P_CENTERS.j_r_the_core
 		return { vars = { card.ability.extra.echipmult, card.ability.extra.active, } }
 	end,
-	rarity = 'r_the_four_shapes',
+	rarity = 'r_the_core',
 	atlas = 't4somcjokers_atlas',
 	pos = { x = 1, y = 1 },
 	cost = 20,
