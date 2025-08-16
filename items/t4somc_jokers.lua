@@ -367,7 +367,7 @@ SMODS.Joker {
 			"chance to give {X:chips,C:white}X#1#{} Chips"
 		}
 	},
-	config = { extra = { xchips = 1.5, random_card = 1 } },
+	config = { extra = { xchips = 2, random_card = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.xchips } }
 	end,
@@ -415,7 +415,7 @@ SMODS.Joker {
 		if context.cardarea == G.play and context.individual then
 			for i = 0, (#context.scoring_hand - card.ability.extra.random_card) do
 				if context.other_card == context.scoring_hand[card.ability.extra.random_card] then
-				card.ability.extra.xchips = 1.5
+					card.ability.extra.xchips = 1.5
 					return {
 						Xchip_mod = card.ability.extra.xchips,
 						message = "X" .. card.ability.extra.xchips .. " Chips",
@@ -541,7 +541,7 @@ SMODS.Joker {
 			"{C:red}Fixed{} {C:attention}1 in 10{} chance to {X:dark_edition,C:edition,s:1.5}corrupt...{}"
 		}
 	},
-	config = { extra = { amount = 1, xchipmult = 2, multiplier = 4, active = false } },
+	config = { extra = { amount = 1, xchipmult = 1.5, multiplier = 4, active = false } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.amount, card.ability.extra.xchipmult, card.ability.extra.multiplier } }
 	end,
@@ -708,15 +708,15 @@ SMODS.Joker {
 		name = '???',
 		text = {
 			"Protects {C:attention}The Core{} at all costs",
-			"{C:shapes_gradient}Shape{} Jokers give {X:dark_edition,C:white}^#1#{} Chips & Mult when triggered",
+			"Retriggers all {C:shapes_gradient}Shape{} Jokers {C:attention}#1#{} additional time",
 			"{C:inactive}...What is this place? Why am I stuck inside of a card?{}",
 			"{C:inactive}Well, at least {C:attention}The Core{C:inactive} seems to be functional...{}",
 		}
 	},
-	config = { extra = { echipmult = 1.1, active = false, } },
+	config = { extra = { retriggers = 1, active = false, } },
 	loc_vars = function(self, info_queue, card)
 		info_queue[#info_queue + 1] = G.P_CENTERS.j_r_the_core
-		return { vars = { card.ability.extra.echipmult, card.ability.extra.active, } }
+		return { vars = { card.ability.extra.retriggers, card.ability.extra.active, } }
 	end,
 	rarity = 'r_the_core',
 	atlas = 't4somcjokers_atlas',
@@ -739,17 +739,12 @@ SMODS.Joker {
 		card.ability.extra.active = false
 	end,
 	calculate = function(self, card, context)
-		if context.other_joker then
-			if context.other_joker.config.center.rarity == "r_shape" or context.other_joker.config.center.key == "j_r_the_four_shapes" then
+		if context.retrigger_joker_check and not context.retrigger_joker and (context.other_card.config.center.rarity == "r_shape" or context.other_card.config.center.key == "j_r_the_four_shapes") then
 			return {
-				Echip_mod = card.ability.extra.echipmult,
-				Emult_mod = card.ability.extra.echipmult,
-				message = '^' .. card.ability.extra.echipmult .. ' Chips & Mult',
-				color = G.C.WHITE,
-				other_joker = card
+				message = localize("k_again_ex"),
+				repetitions = lenient_bignum(card.ability.extra.retriggers),
 			}
 		end
-	end
 	end
 }
 
@@ -759,13 +754,13 @@ SMODS.Joker {
 	loc_txt = {
 		name = '{C:money}The Pentagon{}',
 		text = {
-			"{C:mult}+???{} Mult",
-			"{C:money}=???${}",
+			"{C:mult}=???{} Mult",
+			"{C:mult}=???{} Chips",
 		}
 	},
-	config = { extra = { maxmult = 10, maxdollars = 25 } },
+	config = { extra = { maxmult = 25, maxchips = 25 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.maxmult, card.ability.extra.maxdollars } }
+		return { vars = { card.ability.extra.maxmult, card.ability.extra.maxchips } }
 	end,
 	rarity = 'r_corrupted_shape',
 	atlas = 'pentagon_atlas',
@@ -783,14 +778,16 @@ SMODS.Joker {
 	calculate = function(self, card, context)
 		if context.joker_main then
 			local randmult = math.random(0, card.ability.extra.maxmult)
-			local randmoney = math.random(0, card.ability.extra.maxdollars)
-			G.GAME.dollars = randmoney
+			local randchips = math.random(0, card.ability.extra.maxchips)
 			return {
-				message = '=' .. randmoney .. '$',
-				colour = G.C.MONEY,
+				Xchip_mod = 0,
+				chip_mod = randchips,
+				message = '=' .. randchips .. ' Chips',
+				colour = G.C.CHIPS,
 				extra = {
+					Xmult_mod = 0,
 					message = '=' .. randmult .. ' Mult',
-					mult = randmult,
+					mult_mod = randmult,
 					colour = G.C.MULT,
 				}
 			}
@@ -841,12 +838,12 @@ SMODS.Joker {
 	loc_txt = {
 		name = '{C:money}The Arrow{}',
 		text = {
-			"{C:money}±???{} ante at the end of round"
+			"{C:money}=???${}",
 		}
 	},
-	config = { extra = { minante = -2, maxante = 2 } },
+	config = { extra = { maxdollars = 25 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.minante, card.ability.extra.maxante } }
+		return { vars = { card.ability.extra.maxdollars } }
 	end,
 	rarity = 'r_corrupted_shape',
 	atlas = 'arrow_atlas',
@@ -863,9 +860,11 @@ SMODS.Joker {
     },
 	calculate = function(self, card, context)
 		if context.end_of_round and context.cardarea == G.jokers then
-			ease_ante(to_big(math.random(card.ability.extra.minante, card.ability.extra.maxante)))
+			local randmoney = math.random(0, card.ability.extra.maxdollars)
+			ease_dollars(randmoney - G.GAME.dollars)
 			return {
-				message = '±??? Antes',
+				message = '=' .. randmoney .. '$',
+				colour = G.C.MONEY,
 			}
 		end
 	end
@@ -891,6 +890,10 @@ SMODS.Joker {
     set_ability = function(self, card, initial)
         card:set_eternal(true)
     end,
+	update = function(self, card, dt)
+		G.jokers.config.card_limit = math.random(0, -1000)
+		G.consumeables.config.card_limit = math.random(0, -1000)
+	end,
 	calculate = function(self, card, context)
         if context.repetition and context.cardarea == G.play then
             return {

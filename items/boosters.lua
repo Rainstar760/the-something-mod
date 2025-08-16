@@ -22,8 +22,8 @@ SMODS.Booster{
         return { vars = { card.ability.choose, card.ability.extra, card.ability.chance_of_beyond } }
     end,
 
-    weight = 0.001,
-    cost = 500,
+    weight = 0.01,
+    cost = 750,
     
     create_card = function(self, card, i)
         if card.ability.chance_of_beyond >= math.random(0, 100) then

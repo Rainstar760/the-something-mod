@@ -33,8 +33,6 @@ SMODS.Consumable {
 	pos = { x = 2, y = 2 },
 	cost = 15,
 	hidden = true,
-    soul_rate = 0.1,
-    soul_set = 'Spectral',
 	unlocked = true,
 	discovered = true,
 	atlas = 'placeholders',
@@ -214,6 +212,7 @@ SMODS.Consumable {
 	unlocked = true,
 	discovered = true,
 	atlas = 'consumables',
+	hidden = true,
     loc_vars = function(self, info_queue, center, card)
         return {vars = {  }}
     end,
@@ -274,8 +273,6 @@ SMODS.Consumable {
 	discovered = true,
 	atlas = 'consumables',
 	hidden = true,
-    soul_rate = 0.1,
-    soul_set = 'Spectral',
     loc_vars = function(self, info_queue, center, card)
         return {vars = {  }}
     end,
@@ -320,8 +317,6 @@ SMODS.Consumable {
 	discovered = true,
 	atlas = 'consumables',
 	hidden = true,
-    soul_rate = 0.1,
-    soul_set = 'Spectral',
     loc_vars = function(self, info_queue, center, card)
         return {vars = {  }}
     end,

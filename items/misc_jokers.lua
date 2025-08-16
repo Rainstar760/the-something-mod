@@ -88,3 +88,308 @@ function Card:is_face(from_boss)
     end
     return false
 end
+
+
+--[[SMODS.Joker {
+	key = 'john_jimbo',
+	loc_txt = {
+		name = 'John Jimbo',
+		text = {
+			"Gains {X:mult,C:white}X#1#{} Mult for each owned {C:attention}Vanilla Joker{}",
+			"Default Jokers instead give {X:mult,C:white}X#2#{} Mult",
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
+		}
+	},
+	config = { extra = { xmult_mod = 0.5, xmult_mod_jimbo = 4, xmult = 1 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.xmult_mod, card.ability.extra.xmult_mod_jimbo, card.ability.extra.xmult } }
+	end,
+	rarity = 3,
+	atlas = 'placeholders',
+	pos = { x = 2, y = 0 },
+	cost = 10,
+	update = function(self, card, dt)
+        local vanilla_jokers = {
+        "j_greedy_joker", 
+        "j_lusty_joker", 
+        "j_wrathful_joker", 
+        "j_gluttenous_joker", 
+        "j_jolly", 
+        "j_zany", 
+        "j_mad", 
+        "j_crazy", 
+        "j_droll", 
+        "j_sly", 
+        "j_wily", 
+        "j_clever", 
+        "j_devious", 
+        "j_crafty", 
+        "j_half", 
+        "j_stencil", 
+        "j_four_fingers", 
+        "j_mime", 
+        "j_credit_card", 
+        "j_ceremonial", 
+        "j_banner", 
+        "j_mystic_summit", 
+        "j_marble", 
+        "j_loyalty_card", 
+        "j_8_ball", 
+        "j_misprint", 
+        "j_dusk", 
+        "j_raised_fist", 
+        "j_chaos",
+        "j_fibonacci", 
+        "j_steel_joker", 
+        "j_scary_face", 
+        "j_abstract", 
+        "j_delayed_grat", 
+        "j_hack", 
+        "j_pareidolia", 
+        "j_gros_michel", 
+        "j_even_steven", 
+        "j_odd_todd", 
+        "j_scholar", 
+        "j_business", 
+        "j_supernova", 
+        "j_ride_the_bus", 
+        "j_space", 
+        "j_egg", 
+        "j_burglar", 
+        "j_blackboard", 
+        "j_runner", 
+        "j_ice_cream", 
+        "j_dna", 
+        "j_splash", 
+        "j_blue_joker", 
+        "j_sixth_sense", 
+        "j_constellation", 
+        "j_hiker", 
+        "j_faceless", 
+        "j_green_joker", 
+        "j_superposition", 
+        "j_todo_list", 
+        "j_cavendish", 
+        "j_card_sharp", 
+        "j_red_card", 
+        "j_madness", 
+        "j_square", 
+        "j_seance", 
+        "j_riff_raff", 
+        "j_vampire", 
+        "j_shortcut", 
+        "j_hologram", 
+        "j_vagabond", 
+        "j_baron", 
+        "j_cloud_9",
+        "j_rocket", 
+        "j_obelisk", 
+        "j_midas_mask", 
+        "j_luchador", 
+        "j_photograph", 
+        "j_gift", 
+        "j_turtle_bean", 
+        "j_erosion", 
+        "j_reserved_parking", 
+        "j_mail", 
+        "j_to_the_moon", 
+        "j_hallucination", 
+        "j_fortune_teller", 
+        "j_juggler", 
+        "j_drunkard", 
+        "j_stone", 
+        "j_golden", 
+        "j_lucky_cat", 
+        "j_baseball", 
+        "j_bull", 
+        "j_diet_cola", 
+        "j_trading", 
+        "j_flash", 
+        "j_popcorn", 
+        "j_trousers", 
+        "j_ancient", 
+        "j_ramen", 
+        "j_walkie_talkie", 
+        "j_selzer", 
+        "j_castle", 
+        "j_smiley", 
+        "j_campfire", 
+        "j_ticket", 
+        "j_mr_bones", 
+        "j_acrobat", 
+        "j_sock_and_buskin", 
+        "j_swashbuckler", 
+        "j_troubadour", 
+        "j_certificate", 
+        "j_smeared", 
+        "j_throwback", 
+        "j_hanging_chad",
+        "j_rough_gem", 
+        "j_bloodstone",
+        "j_arrowhead", 
+        "j_onyx_agate", 
+        "j_glass", 
+        "j_ring_master", 
+        "j_flower_pot", 
+        "j_blueprint", 
+        "j_wee", 
+        "j_merry_andy", 
+        "j_oops", 
+        "j_idol", 
+        "j_seeing_double", 
+        "j_matador", 
+        "j_hit_the_road", 
+        "j_duo", 
+        "j_trio", 
+        "j_family", 
+        "j_order", 
+        "j_tribe", 
+        "j_stuntman", 
+        "j_invisible", 
+        "j_brainstorm", 
+        "j_satellite", 
+        "j_shoot_the_moon", 
+        "j_drivers_license", 
+        "j_cartomancer", 
+        "j_astronomer", 
+        "j_burnt", 
+        "j_bootstraps", 
+        "j_caino", 
+        "j_triboulet", 
+        "j_yorick", 
+        "j_chicot", 
+        "j_perkeo"}
+		for k, v in pairs(G.joker.cards) do
+            local count = 0
+            for i=1, #vanilla_jokers do
+			    if v.config.center.key == vanilla_jokers[i] then
+                    count = count + 1
+                    card.ability.extra.xmult = 1 + (card.ability.extra.xmult_mod * count)
+                end
+            end
+        end
+        for i=1, #SMODS.find_card("j_joker") do
+            card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_mod_jimbo
+        end
+	end,
+}
+
+
+SMODS.Joker {
+	key = 'diamond_joker',
+	loc_txt = {
+		name = 'Diamond Joker',
+		text = {
+			"Earn {C:money}the amount of $ you have{} at the end of round",
+			"{C:inactive}(#1# max){}",
+		}
+	},
+	config = { extra = { maxmoney = 25 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.maxmoney } }
+	end,
+	rarity = 3,
+	atlas = 'placeholders',
+	pos = { x = 2, y = 0 },
+	cost = 10,
+	calc_dollar_bonus = function(self, card)
+	return 
+		math.max(G.GAME.dollars, card.ability.extra.maxmoney)
+	end
+}
+--]]
+
+SMODS.Joker {
+	key = 'the_incredible_photochud',
+	loc_txt = {
+		name = 'The Incredible Photochud',
+		text = {
+			"Retriggers the {C:attention}first{} scoring card {C:attention}#1#{} times",
+            "The first scoring {C:attention}Face Card{} gives {X:mult,C:white}X#2#{} Mult when triggered"
+		}
+	},
+	config = { extra = { retriggers = 4, xmult = 4 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.retriggers, card.ability.extra.xmult } }
+	end,
+	rarity = 4,
+	atlas = 'placeholders',
+	pos = { x = 3, y = 0 },
+	cost = 20,
+    calculate = function(self, card, context)
+        if context.repetition and context.cardarea == G.play then
+            if context.other_card == context.scoring_hand[1] then
+                return {
+                    repetitions = card.ability.extra.retriggers,
+                    message = localize('k_again_ex')
+                }
+            end
+        end
+        if context.individual and context.cardarea == G.play then
+            if context.other_card == context.scoring_hand[1] and context.other_card:is_face() then
+                return {
+                    Xmult_mod = card.ability.extra.xmult,
+                    message = "X" .. card.ability.extra.xmult .. " Mult",
+                    colour = G.C.MULT
+                }
+            end
+        end
+    end
+}
+
+SMODS.Joker {
+	key = 'factory',
+	loc_txt = {
+		name = 'Factory',
+		text = {
+			"{C:chips}+#1#!{} Chips and {C:mult}+#2#?{} Mult",
+            "Both values increase by {C:attention}#3#{} at the end of round"
+		}
+	},
+	config = { extra = { chips = 1, mult = 1, increase = 1 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.increase } }
+	end,
+	rarity = 3,
+	atlas = 'placeholders',
+	pos = { x = 3, y = 0 },
+	cost = 12,
+    calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				mult_mod = factorial_iterative_addition(card.ability.extra.mult),
+				message = '+' .. factorial_iterative_addition(card.ability.extra.mult) .. ' Mult',
+                color = G.C.MULT,
+                extra = {
+				    chip_mod = factorial(card.ability.extra.chips),
+				    message = '+' .. factorial(card.ability.extra.chips) .. ' Chips',
+                    color = G.C.CHIPS,
+                }
+			}
+		end
+        if (context.end_of_round and context.cardarea == G.jokers) or context.forcetrigger then
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.increase
+            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.increase
+			return {
+				message = "Upgraded!",
+                color = G.C.ATTENTION,
+			}
+        end
+    end
+}
+
+function factorial(n)
+    if n == 0 then
+        return 1
+    else
+        return n * factorial(n - 1)
+    end
+end
+
+function factorial_iterative_addition(n)
+    local result = 0
+    for i = 1, n do
+        result = result + i
+    end
+    return result
+end

@@ -9,9 +9,9 @@
     "prefix": "r",
     "main_file": "balls.lua",
     "priority": 1e100,
-    "badge_colour": "",
-    "badge_text_colour": "",
-    "version": "1.0.0",
+    "badge_colour": "#000000",
+    "badge_text_colour": "#ffffff",
+    "version": "1.0.1",
     "dependencies": [
         "Talisman"
     ]

@@ -8,6 +8,8 @@ local files = {
 	"items/misc_jokers",
 	"items/cracked_jokers",
 	"items/boosters",
+	"items/blinds",
+	"items/decks",
 	--"items/unbalanced_seals",
 	"lib/cardanim",
 	"lib/cardanim_macros/skim",
@@ -31,3 +33,4 @@ SMODS.Atlas {
 --function to_big(n)
 --	return tb(n*1)
 --end
+

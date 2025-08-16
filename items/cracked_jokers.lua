@@ -1,4 +1,11 @@
--- rarities (and gradients)
+-- rarities (and gradients (and the atlas))
+
+SMODS.Atlas {
+    key = "crackedjokers_atlas",
+    path = "crackedjokers.png",
+    px = 71,
+    py = 95
+}
 
 SMODS.Rarity({
 	key = "cracked",
@@ -55,19 +62,28 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'The Joker of All Jokers',
 		text = {
+			{
 			"Cards held in hand give {X:mult,C:white}x#1#{} Mult",
 			"Scored Cards give {X:dark_edition,C:white}^#2#{} Mult",
 			"{X:dark_edition,C:edition}^^#3#{} Mult when triggered",
+			},
+			{
+			"{X:attention,C:white}X#4#{} Ante when obtained"
+			},
 		}
 	},
-	config = { extra = { held_xmult = 4, scored_emult = 4, eemult = 4 } },
+	config = { extra = { held_xmult = 4, scored_emult = 4, eemult = 4, xante = 2 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.held_xmult, card.ability.extra.scored_emult, card.ability.extra.eemult } }
+		return { vars = { card.ability.extra.held_xmult, card.ability.extra.scored_emult, card.ability.extra.eemult, card.ability.extra.xante } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 0, y = 0 },
+	soul_pos = { x = 1, y = 0 },
 	cost = 500,
+    add_to_deck = function(self, card, from_debuff)
+        ease_ante((G.GAME.round_resets.ante * card.ability.extra.xante) - G.GAME.round_resets.ante)
+	end,
 	calculate = function(self, card, context)
 		if context.joker_main then
 			return {
@@ -99,16 +115,24 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'Money Printer',
 		text = {
+			{
 			"Gives {X:dark_edition,C:white}^#1#${} at the end of round",
+			},
+			{
+			"Sets money to {C:attention}0${} when obtained",
+			}
 		}
 	},
 	config = { extra = { emoney = 2 } },
+    add_to_deck = function(self, card, from_debuff)
+        ease_dollars(-G.GAME.dollars)
+	end,
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.emoney } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 2, y = 0 },
 	cost = 500,
 	calc_dollar_bonus = function(self, card)
 	return 
@@ -121,24 +145,32 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'The Fucking Universe Itself',
 		text = {
+			{
 			"Gains {X:dark_edition,C:white}^#1#{} Chips and {X:dark_edition,C:white}^#2#{} Mult",
 			"for every atom in the observable universe",
             "{C:inactive}(Currently {X:dark_edition,C:white}^#3#{} Chips and {X:dark_edition,C:white}^#4#{} Mult)"
+			},
+			{
+			"Ante scaling becomes {X:attention,C:white}exponential{}"
+			},
 		}
 	},
-	config = { extra = { echips_mod = 1, emult_mod = 1, echips = 1, emult = 1 } },
+	config = { extra = { echips_mod = 1, emult_mod = 1, echips = 1, emult = 1, esize = 2 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.echips_mod, card.ability.extra.emult_mod, card.ability.extra.echips, card.ability.extra.emult } }
+		return { vars = { card.ability.extra.echips_mod, card.ability.extra.emult_mod, card.ability.extra.echips, card.ability.extra.emult, card.ability.extra.esize } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 3, y = 0 },
 	cost = 500,
 	update = function(self, card, dt)
 		card.ability.extra.echips = card.ability.extra.echips_mod * 1e82
 		card.ability.extra.emult = card.ability.extra.emult_mod * 1e82
 	end,
 	calculate = function(self, card, context)
+		if context.setting_blind then
+			G.GAME.exponential_scaling = true
+		end
 		if context.joker_main then
 			return {
 				Echip_mod = card.ability.extra.echips,
@@ -159,19 +191,44 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'Flushmaster',
 		text = {
+			{
 			"Flushes and Straights can now be made with only {C:attention}1{} card",
 			"If played hand is a {C:attention}Flush{}, {C:attention}Straight Flush{}, {C:attention}Flush House{} or {C:attention}Flush Five{},",
 			"{X:attention,C:white}X#1#{} all of its stats before scoring"
+			},
+			{
+			"Every other {C:attention}Poker Hand{}'s stats is set to {C:attention}0{} and",
+			"{C:attention} cannot be changed{}"
+			},
 		}
 	},
-	config = { extra = { multiplier = 10 } },
+	config = { extra = { multiplier = 10, active = false } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.multiplier } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 4, y = 0 },
 	cost = 500,
+    add_to_deck = function(self, card, from_debuff)
+		card.ability.extra.active = true
+	end,
+    remove_from_deck = function(self, card, from_debuff)
+		card.ability.extra.active = false
+	end,
+	update = function(self, card, dt)
+		if card.ability.extra.active == true then
+			for k, v in pairs(G.GAME.hands) do
+				if not v == "Flush" or not v == "Straight Flush" or not v == "Flush Five" or not v == "Flush House" then
+					G.GAME.hands[k].chips = 0
+					G.GAME.hands[k].mult = 0
+					G.GAME.hands[k].l_chips = 0
+					G.GAME.hands[k].l_mult = 0
+					G.GAME.hands[k].level = 0
+				end
+			end
+		end
+	end,
 	calculate = function(self, card, context)
 		if context.before and next(context.poker_hands["Flush"]) then
 			G.GAME.hands[context.scoring_name].level = G.GAME.hands[context.scoring_name].level * card.ability.extra.multiplier
@@ -325,9 +382,10 @@ SMODS.Joker {
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.EEEEEmult } }
 	end,
+	dependencies = {"cryptposting"},
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 5, y = 0 },
 	cost = 500,
 	calculate = function(self, card, context)
 		if context.joker_main then
@@ -345,36 +403,58 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'The Unweighted',
 		text = {
-			"Creates {C:attention}#1#{} random {C:attention}Joker{} when exiting shop",
-			"Creates {C:attention}#2#{} random {C:attention}Consumables{} when blind is selected",
-			"Applies a random {C:attention}Edition{} to a random {C:attention}Joker{} when blind is selected",
-			"Applies a random {C:attention}Enhancement{} to a random card held in hand when hand is played",
+			{
+			"Creates {C:attention}#1#{} random {C:edition}Negative {C:attention}Joker{} when exiting shop",
+			"Creates {C:attention}#2#{} random {C:edition}Negative {C:attention}Consumables{} when blind is selected",
+			"Creates {C:attention}#3#{} random {C:attention}Tags{} when blind is skipped",
 			"All possibilities in this joker are {C:attention}completely unweighted{}"
+			},
+			{
+			"Destroys all held {C:attention}Jokers{} and {C:attention}Consumables{}",
+			"when obtained, bypassing all restrictions"
+			}
 		}
 	},
-	config = { extra = { jokers = 1, consumables = 3 } },
+	config = { extra = { jokers = 1, consumables = 2, tags = 3 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.jokers, card.ability.extra.consumables } }
+		return { vars = { card.ability.extra.jokers, card.ability.extra.consumables, card.ability.extra.tags } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 6, y = 0 },
 	cost = 500,
+    add_to_deck = function(self, card, from_debuff)
+		local _first_dissolve = nil
+		G.E_MANAGER:add_event(Event({
+			trigger = "before",
+			delay = 0.75,
+			func = function()
+				for _, v in ipairs(G.jokers.cards) do
+					if v ~= card then
+						v:start_dissolve(nil, _first_dissolve)
+						_first_dissolve = true
+					end
+				end
+				for _, v in ipairs(G.consumeables.cards) do
+					v:start_dissolve(nil, _first_dissolve)
+					_first_dissolve = true
+				end
+				return true
+			end,
+		}))
+	end,
 	calculate = function(self, card, context)
 		if context.setting_blind then
 			for i=1, card.ability.extra.consumables do
 				local key = G.P_CENTER_POOLS.Consumeables[math.random(0, #G.P_CENTER_POOLS.Consumeables)].key
 				G.E_MANAGER:add_event(Event({func = function()
 					local card1 = create_card('Consumeables', G.consumeables, nil, nil, nil, nil, key, 'john_unweighter')
+                    card1:set_edition("e_negative", true)
 					card1:add_to_deck()
 					G.consumeables:emplace(card1)
 					card1:juice_up(0.3, 0.5)
 					return true
 				end }))
-			end
-			if context.cardarea == G.jokers then
-				local i = math.random(0, #G.jokers.cards)
-            	G.jokers.cards[i]:set_edition(G.P_CENTER_POOLS["Edition"][math.random(1, #G.P_CENTER_POOLS["Edition"])].key, true, true)
 			end
 		end
 		if context.ending_shop then
@@ -382,6 +462,7 @@ SMODS.Joker {
 				local key = G.P_CENTER_POOLS.Joker[math.random(0, #G.P_CENTER_POOLS.Joker)].key
 				G.E_MANAGER:add_event(Event({func = function()
 					local card1 = create_card('Joker', G.jokers, nil, nil, nil, nil, key, 'john_unweighter')
+                    card1:set_edition("e_negative", true)
 					card1:add_to_deck()
 					G.jokers:emplace(card1)
 					card1:juice_up(0.3, 0.5)
@@ -389,18 +470,20 @@ SMODS.Joker {
 				end }))
 			end
 		end
-		if context.before then
-			local i = math.random(0, #G.hand.cards)
-            G.hand.cards[i]:set_ability(G.P_CENTER_POOLS.Enhanced[math.random(1, #G.P_CENTER_POOLS.Enhanced)].key, true)
+        if context.skip_blind then
+			for i=1, card.ability.extra.tags do
+				add_tag(Tag(G.P_CENTER_POOLS.Tag[math.random(1, #G.P_CENTER_POOLS.Tag)].key))
+			end
 		end
 	end
 }
+
 SMODS.Joker {
 	key = 'zulu_2',
 	loc_txt = {
 		name = 'zulu but better',
 		text = {
-			"{C:valk_prestigious,s:5}+pi Zulu{}",
+			"{C:valk_prestigious,s:10}+pi Zulu{}",
 		}
 	},
 	config = { extra = { zulu = math.pi } },
@@ -409,13 +492,49 @@ SMODS.Joker {
 		return { vars = { card.ability.extra.zulu } }
 	end,
 	rarity = 'r_cracked',
-	atlas = 'placeholders',
-	pos = { x = 10, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 7, y = 0 },
 	cost = 500 * math.pi,
 	calculate = function(self, card, context)
 		if context.joker_main then
         	G.GAME.zulu = (G.GAME.zulu and G.GAME.zulu+card.ability.extra.zulu) or (math.pi+card.ability.extra.zulu)
 		end
+	end
+}
+
+SMODS.Joker {
+	key = 'oil_lamp_deluxe',
+	loc_txt = {
+		name = 'Oil Lamp: Deluxe Edition',
+		text = {
+			"Increases values of {C:attention}ALL Jokers{} by {X:attention,C:white}^#1#{}",
+			"at the end of round",
+			"{C:inactive}(Works on itself)"
+		}
+	},
+	config = { extra = { value_increase = 1.2 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.value_increase } }
+	end,
+	dependencies = {"Cryptid"},
+	rarity = 'r_cracked',
+	atlas = 'placeholders',
+	pos = { x = 10, y = 0 },
+	cost = 500,
+	calculate = function(self, card, context)
+        if (context.end_of_round and context.cardarea == G.jokers) or context.forcetrigger then
+            for i, v in pairs(G.jokers.cards) do
+				Cryptid.manipulate(G.jokers.cards[i], { value = { arrows = 1, height = card.ability.extra.value_increase }, type = "hyper" })
+            end
+			card_eval_status_text(
+				card,
+				"extra",
+				nil,
+				nil,
+				nil,
+				{ message = localize("k_upgrade_ex"), colour = G.C.GREEN }
+			)
+        end
 	end
 }
 
@@ -434,8 +553,8 @@ SMODS.Joker {
 		return { vars = { card.ability.extra.chips } }
 	end,
 	rarity = 'r_beyond_cracked',
-	atlas = 'placeholders',
-	pos = { x = 11, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 8, y = 0 },
 	cost = 1000000,
 	calculate = function(self, card, context)
 		if context.setting_blind then
@@ -467,8 +586,9 @@ SMODS.Joker {
 		return { vars = { card.ability.extra.jokers, card.ability.extra.cards, '{', '}' } }
 	end,
 	rarity = 'r_beyond_cracked',
-	atlas = 'placeholders',
-	pos = { x = 11, y = 0 },
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 9, y = 0 },
+	soul_pos = { x = 1, y = 0 },
 	cost = 1000000,
 	add_to_deck = function(self, card, from_debuff)
 		card.ability.extra.active = true
@@ -501,7 +621,7 @@ SMODS.Joker {
 			"including this value"
 		}
 	},
-	config = { extra = { mod = 2, chips = 3 } },
+	config = { extra = { mod = 2.00001, chips = 2.00001 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.mod, card.ability.extra.chips, '{', '}' } }
 	end,
@@ -580,7 +700,7 @@ SMODS.Joker {
 			card.ability.extra.chips_operator = card.ability.extra.chips_operator + card.ability.extra.chips_operator_mod
 			card.ability.extra.mult_operator = card.ability.extra.mult_operator + card.ability.extra.mult_operator_mod
 			return {
-				message = 'Upgrade!',
+				message = 'Upgraded!',
 				colour = G.C.DARK_EDITION,
 				card = card
 			}
@@ -698,12 +818,13 @@ SMODS.Joker {
 		text = {
 			"Allows you to go into {X:dark_edition,C:white}infinite{} debt",
 			"{C:green}All rerolls are free{}",
-			"{C:inactive}crustulum 2{}"
+			"Earn {X:money,C:white}X-1${} at the end of round if you're in debt, then earn {X:money,C:dark_edition}^^^#1#${}",
+			"{C:inactive}crustulum if it was actually good{}",
 		}
 	},
-	config = { extra = { chips = 0 } },
+	config = { extra = { eeemoners = 2 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.chips } }
+		return { vars = { card.ability.extra.eeemoners } }
 	end,
 	rarity = 'r_beyond_cracked',
 	atlas = 'placeholders',
@@ -716,5 +837,14 @@ SMODS.Joker {
     remove_from_deck = function(self, card, from_debuff)
         G.GAME.bankrupt_at = G.GAME.bankrupt_at + math.huge
         SMODS.change_free_rerolls(-math.huge)
+	end,
+	calc_dollar_bonus = function(self, card)
+	return 
+		G.GAME.dollars:arrow(3, card.ability.extra.eeemoners)
+	end,
+	calculate = function(self, card, context)
+        if (context.end_of_round and context.cardarea == G.jokers) and G.GAME.dollars < 0 then
+			ease_dollars(G.GAME.dollars * 2)
+        end
 	end
 }
