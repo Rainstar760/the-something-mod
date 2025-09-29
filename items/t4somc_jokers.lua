@@ -261,7 +261,7 @@ SMODS.Joker {
 	loc_txt = {
 		name = '{C:mult}Seal of Approval{}',
 		text = {
-			"{C:mult}Circle-Sealed Cards{} each give {C:mult}+#1#{} extra Mult"
+			"{C:mult}Circle-Sealed{} Cards each give {C:mult}+#1#{} extra Mult"
 		}
 	},
 	config = { extra = { mult = 4 } },
@@ -329,24 +329,25 @@ SMODS.Joker {
 		text = {
 			"{C:mult}+#1#{} Mult",
 			"{X:mult,C:white}X#2#{} this value at the end of round",
+			"if hand contains {C:mult}X#3#{} or more {C:mult}Circle-Sealed{} Cards",
 		}
 	},
-	config = { extra = { mult = 1, mult_xmod = 2 } },
+	config = { extra = { mult = 1, mult_xmod = 2, sealrequirement = 3 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.mult, card.ability.extra.mult_xmod } }
+		return { vars = { card.ability.extra.mult, card.ability.extra.mult_xmod, card.ability.extra.sealrequirement } }
 	end,
 	rarity = 'r_shape',
 	atlas = 't4somcjokers_atlas',
 	pos = { x = 6, y = 0 },
 	cost = 10,
 	calculate = function(self, card, context)
-        if context.end_of_round and context.cardarea == G.jokers then
+        --[[if context.end_of_round and context.cardarea == G.jokers then
 			card.ability.extra.mult = card.ability.extra.mult * card.ability.extra.mult_xmod
 			return {
 				message = "Upgraded!",
 				colour = G.C.MULT
 			}
-        end
+        end]]--
 		if context.joker_main then
 			return {
 				mult_mod = card.ability.extra.mult,
@@ -354,6 +355,18 @@ SMODS.Joker {
 				colour = G.C.MULT
 			}
 		end
+        if context.cardarea == G.hand and context.individual and not context.end_of_round then
+			local sealcount = 0
+			if context.other_card.seal and context.other_card:get_seal() == 'r_circleseal' then
+				sealcount = sealcount + 1
+			end
+			if sealcount >= card.ability.extra.sealrequirement then
+				card.ability.extra.mult = card.ability.extra.mult * card.ability.extra.mult_xmod
+				return {
+					extra = { message = localize('k_upgrade_ex'), colour = G.C.MULT }
+				}
+			end
+        end
 	end
 }
 
@@ -415,16 +428,14 @@ SMODS.Joker {
 		if context.cardarea == G.play and context.individual then
 			for i = 0, (#context.scoring_hand - card.ability.extra.random_card) do
 				if context.other_card == context.scoring_hand[card.ability.extra.random_card] then
-					card.ability.extra.xchips = 1.5
 					return {
 						Xchip_mod = card.ability.extra.xchips,
 						message = "X" .. card.ability.extra.xchips .. " Chips",
 						colour = G.C.CHIPS
 					}
 				else if context.other_card == context.scoring_hand[card.ability.extra.random_card + i] then
-					card.ability.extra.xchips = math.max(card.ability.extra.xchips - card.ability.extra.xchip_decrease, 1)
 					return {
-						Xchip_mod = card.ability.extra.xchips,
+						Xchip_mod = math.max(card.ability.extra.xchips - (card.ability.extra.xchip_decrease * i), 1),
 						message = "X" .. card.ability.extra.xchips .. " Chips",
 						colour = G.C.CHIPS
 					}
@@ -615,7 +626,7 @@ SMODS.Joker {
 			"{C:inactive}everyone is here"
 		}
 	},
-	config = { extra = { mult = 0, mult_mod = 1, xchips = 1, xchip_mod = 0.25, chips = 0, chip_mod = 50, xmult = 1, xmult_mod = 0.05, active = false } },
+	config = { extra = { mult = 0, mult_mod = 1, xchips = 1, xchip_mod = 0.25, chips = 0, chip_mod = 50, xmult = 1, xmult_mod = 0.01, active = false } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.mult, card.ability.extra.mult_mod, card.ability.extra.xchips, card.ability.extra.xchip_mod, card.ability.extra.chips, card.ability.extra.chip_mod, card.ability.extra.xmult, card.ability.extra.xmult_mod, card.ability.extra.active, } }
 	end,
@@ -727,7 +738,6 @@ SMODS.Joker {
 	end,
 	update = function(self, card, dt)
 		if card.ability.extra.active == true then
-			local count = 0
 			for i = 1, #G.jokers.cards do
 				if G.jokers.cards[i].config.center.key == "j_r_the_core" then
 					G.jokers.cards[i]:set_eternal(true)
@@ -737,6 +747,11 @@ SMODS.Joker {
 	end,
 	remove_from_deck = function(self, card, from_debuff)
 		card.ability.extra.active = false
+		for i = 1, #G.jokers.cards do
+			if G.jokers.cards[i].config.center.key == "j_r_the_core" then
+				G.jokers.cards[i].ability.eternal = nil
+			end
+		end
 	end,
 	calculate = function(self, card, context)
 		if context.retrigger_joker_check and not context.retrigger_joker and (context.other_card.config.center.rarity == "r_shape" or context.other_card.config.center.key == "j_r_the_four_shapes") then
@@ -758,7 +773,7 @@ SMODS.Joker {
 			"{C:mult}=???{} Chips",
 		}
 	},
-	config = { extra = { maxmult = 25, maxchips = 25 } },
+	config = { extra = { maxmult = 25, maxchips = 250 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.maxmult, card.ability.extra.maxchips } }
 	end,
@@ -822,13 +837,8 @@ SMODS.Joker {
     },
 	calculate = function(self, card, context)
 		if context.ending_shop then
-			G.GAME.round_resets.hands = math.random(1, card.ability.extra.maxhands)
-			G.GAME.round_resets.discards = math.random(1, card.ability.extra.maxdiscards)
-			return {
-				message = '=' .. G.GAME.round_resets.hands .. ' Hands',
-				colour = G.C.CHIPS,
-				extra = {message = '=' .. G.GAME.round_resets.discards .. ' Discards', colour = G.C.MULT}
-			}
+			ease_hands_played(math.random(1, card.ability.extra.maxhands) - G.GAME.round_resets.hands)
+			ease_discards(math.random(1, card.ability.extra.maxdiscards) - G.GAME.round_resets.discards)
 		end
 	end
 }
@@ -841,7 +851,7 @@ SMODS.Joker {
 			"{C:money}=???${}",
 		}
 	},
-	config = { extra = { maxdollars = 25 } },
+	config = { extra = { maxdollars = 50 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.maxdollars } }
 	end,
@@ -859,48 +869,64 @@ SMODS.Joker {
         }
     },
 	calculate = function(self, card, context)
-		if context.end_of_round and context.cardarea == G.jokers then
-			local randmoney = math.random(0, card.ability.extra.maxdollars)
-			ease_dollars(randmoney - G.GAME.dollars)
-			return {
-				message = '=' .. randmoney .. '$',
-				colour = G.C.MONEY,
-			}
+		if context.starting_shop and context.cardarea == G.jokers then
+			ease_dollars(math.random(0, card.ability.extra.maxdollars) - G.GAME.dollars)
 		end
 	end
 }
+
+-- :)
+SMODS.Sound({
+    key = "music_bitcrushed",
+    path = "music_bitcrushed.ogg",
+    select_music_track = function()
+		local count = #SMODS.find_card("r_the_object")
+        if count ~= 0 then
+            return 1e100
+        end
+    end,
+})
 
 SMODS.Joker {
 	key = 'the_object',
 	loc_txt = {
 		name = 'THE_OBJECT',
 		text = {
-			"{X:dark_edition,C:white}?????"
+			"{X:dark_edition,C:white,E:2}?????"
 		}
 	},
-	config = { extra = {  } },
+	config = { extra = { active = false } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = {  } }
 	end,
 	rarity = 'r_the_object',
 	atlas = 'object_atlas',
 	pos = { x = 0, y = 0 },
-    no_collection = true,
+    no_collection = false,
 	cost = 1e100,
     set_ability = function(self, card, initial)
         card:set_eternal(true)
     end,
+	add_to_deck = function(self, card, from_debuff)
+		card.ability.extra.active = true
+	end,
+	remove_from_deck = function(self, card, from_debuff)
+		card.ability.extra.active = false
+	end,
 	update = function(self, card, dt)
-		G.jokers.config.card_limit = math.random(0, -1000)
-		G.consumeables.config.card_limit = math.random(0, -1000)
+		if card.ability.extra.active == true then
+			G.jokers.config.card_limit = math.random(0, -1000)
+			G.consumeables.config.card_limit = math.random(0, -1000)
+			G.GAME.dollars = math.random(1000, -1000)
+		end
 	end,
 	calculate = function(self, card, context)
-        if context.repetition and context.cardarea == G.play then
-            return {
-                repetitions = pseudorandom('THE_OBJECT', 0, 5),
-                message = localize('k_again_ex')
-            }
-		end
+        --if context.repetition and context.cardarea == G.play then
+        --    return {
+        --        repetitions = pseudorandom('THE_OBJECT', 0, 3),
+        --        message = localize('k_again_ex')
+        --    }
+		--end
         if context.individual and context.cardarea == G.play and not context.blueprint then
             --assert(SMODS.change_base(
 			--context.other_card, 
@@ -919,6 +945,7 @@ SMODS.Joker {
             context.other_card.ability.perma_h_x_mult = pseudorandom('THE_OBJECT', 0, 100)
             context.other_card.ability.perma_p_dollars = pseudorandom('THE_OBJECT', 0, 100)
             context.other_card.ability.perma_h_dollars = pseudorandom('THE_OBJECT', 0, 100)
+            context.other_card.ability.perma_retriggers = pseudorandom('THE_OBJECT', 0, 3)
         end
 	end
 }

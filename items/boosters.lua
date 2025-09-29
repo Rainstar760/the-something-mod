@@ -14,7 +14,7 @@ SMODS.Booster{
     draw_hand = false,
     config = {
         choose = 1,
-        extra = 4,
+        extra = 5,
         chance_of_beyond = 1
     },
 

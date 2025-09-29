@@ -57,6 +57,8 @@ local beyond_cracked_gradient = SMODS.Gradient({
 })
 
 -- cracked jokers
+
+-- jbimbo
 SMODS.Joker {
 	key = 'the_joker',
 	loc_txt = {
@@ -72,7 +74,7 @@ SMODS.Joker {
 			},
 		}
 	},
-	config = { extra = { held_xmult = 4, scored_emult = 4, eemult = 4, xante = 2 } },
+	config = { extra = { held_xmult = 4, scored_emult = 4, eemult = 4, xante = 4 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.held_xmult, card.ability.extra.scored_emult, card.ability.extra.eemult, card.ability.extra.xante } }
 	end,
@@ -109,7 +111,7 @@ SMODS.Joker {
 	end
 }
 
-
+-- money generator (better than compound interest fr)
 SMODS.Joker {
 	key = 'money_printer',
 	loc_txt = {
@@ -140,45 +142,47 @@ SMODS.Joker {
 	end
 }
 
+-- i dont even know why this exists ill be fr but eh
 SMODS.Joker {
 	key = 'the_universe',
 	loc_txt = {
 		name = 'The Fucking Universe Itself',
 		text = {
 			{
-			"Gains {X:dark_edition,C:white}^#1#{} Chips and {X:dark_edition,C:white}^#2#{} Mult",
+			"Gains {X:mult,C:white}X#1#{} Chips and {X:mult,C:white}C#2#{} Mult",
 			"for every atom in the observable universe",
-            "{C:inactive}(Currently {X:dark_edition,C:white}^#3#{} Chips and {X:dark_edition,C:white}^#4#{} Mult)"
+            "{C:inactive}(Currently {X:mult,C:white}C#3#{} Chips and {X:mult,C:white}X#4#{} Mult)"
 			},
 			{
-			"Ante scaling becomes {X:attention,C:white}exponential{}"
+			"{X:mult,C:white}^#5#{} Blind Size when Blind is selected"
 			},
 		}
 	},
-	config = { extra = { echips_mod = 1, emult_mod = 1, echips = 1, emult = 1, esize = 2 } },
+	config = { extra = { xchips_mod = 1, xmult_mod = 1, xchips = 1, xmult = 1, esize = 2 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.echips_mod, card.ability.extra.emult_mod, card.ability.extra.echips, card.ability.extra.emult, card.ability.extra.esize } }
+		return { vars = { card.ability.extra.xchips_mod, card.ability.extra.xmult_mod, card.ability.extra.xchips, card.ability.extra.xmult, card.ability.extra.esize } }
 	end,
 	rarity = 'r_cracked',
 	atlas = 'crackedjokers_atlas',
 	pos = { x = 3, y = 0 },
 	cost = 500,
 	update = function(self, card, dt)
-		card.ability.extra.echips = card.ability.extra.echips_mod * 1e82
-		card.ability.extra.emult = card.ability.extra.emult_mod * 1e82
+		card.ability.extra.xchips = card.ability.extra.xchips_mod * 1e82
+		card.ability.extra.xmult = card.ability.extra.xmult_mod * 1e82
 	end,
 	calculate = function(self, card, context)
 		if context.setting_blind then
-			G.GAME.exponential_scaling = true
+			G.GAME.blind.chips = math.floor(G.GAME.blind.chips ^ card.ability.extra.esize)
+			G.GAME.blind.chip_text = number_format(G.GAME.blind.chips)
 		end
 		if context.joker_main then
 			return {
-				Echip_mod = card.ability.extra.echips,
-				message = '^' .. card.ability.extra.echips .. ' Chips',
+				Xchip_mod = card.ability.extra.xchips,
+				message = '^' .. card.ability.extra.xchips .. ' Chips',
                 color = G.C.DARK_EDITION,
 				extra = {
-					Emult_mod = card.ability.extra.emult,
-					message = '^' .. card.ability.extra.emult .. ' Mult',
+					Xmult_mod = card.ability.extra.xmult,
+					message = '^' .. card.ability.extra.xmult .. ' Mult',
             	    color = G.C.DARK_EDITION
 				}
 			}
@@ -186,6 +190,7 @@ SMODS.Joker {
 	end
 }
 
+-- i love flushes
 SMODS.Joker {
 	key = 'flushmaster',
 	loc_txt = {
@@ -251,6 +256,7 @@ function SMODS.four_fingers()
     return smods_four_fingers_ref()
 end
 
+-- currently commented out because i made unbalanced consumables and whatever not load in the game (im too afraid of the possibility of being immediately called out and shat on because of people thinking the concept is too similar to polt her works's omega consumables)
 --SMODS.Joker {
 --	key = 'unbalancer',
 --	loc_txt = {
@@ -369,6 +375,7 @@ end
 --	end
 --}
 
+-- henry is back
 SMODS.Joker {
 	key = 'heptation_henry',
 	loc_txt = {
@@ -398,6 +405,7 @@ SMODS.Joker {
 	end
 }
 
+-- i love unweighted possibilities
 SMODS.Joker {
 	key = 'unweighted',
 	loc_txt = {
@@ -407,6 +415,7 @@ SMODS.Joker {
 			"Creates {C:attention}#1#{} random {C:edition}Negative {C:attention}Joker{} when exiting shop",
 			"Creates {C:attention}#2#{} random {C:edition}Negative {C:attention}Consumables{} when blind is selected",
 			"Creates {C:attention}#3#{} random {C:attention}Tags{} when blind is skipped",
+			"Redeems {C:attention}#4#{} random {C:attention}Voucher{} when boss blind is defeated",
 			"All possibilities in this joker are {C:attention}completely unweighted{}"
 			},
 			{
@@ -415,9 +424,9 @@ SMODS.Joker {
 			}
 		}
 	},
-	config = { extra = { jokers = 1, consumables = 2, tags = 3 } },
+	config = { extra = { jokers = 1, consumables = 2, tags = 3, vouchers = 1 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.jokers, card.ability.extra.consumables, card.ability.extra.tags } }
+		return { vars = { card.ability.extra.jokers, card.ability.extra.consumables, card.ability.extra.tags, card.ability.extra.vouchers } }
 	end,
 	rarity = 'r_cracked',
 	atlas = 'crackedjokers_atlas',
@@ -475,9 +484,33 @@ SMODS.Joker {
 				add_tag(Tag(G.P_CENTER_POOLS.Tag[math.random(1, #G.P_CENTER_POOLS.Tag)].key))
 			end
 		end
+		
+        if context.end_of_round and context.main_eval and G.GAME.blind.boss then
+			for i=1, card.ability.extra.vouchers do
+        		local voucher_key = G.P_CENTER_POOLS.Voucher[math.random(1, #G.P_CENTER_POOLS.Voucher)].key
+				local voucher_card = SMODS.create_card{area = G.play, key = voucher_key}
+				voucher_card:start_materialize()
+				voucher_card.cost = 0
+				G.play:emplace(voucher_card)
+				delay(0.8)
+				voucher_card:redeem()		
+				G.E_MANAGER:add_event(Event({
+				    trigger = 'after',
+				    delay = 0.5,
+				    func = function()
+				        voucher_card:start_dissolve()                
+				        return true
+				    end
+				}))
+        		return {
+        		    message = nil
+        		}
+			end
+        end
 	end
 }
 
+-- zulu 2
 SMODS.Joker {
 	key = 'zulu_2',
 	loc_txt = {
@@ -502,6 +535,7 @@ SMODS.Joker {
 	end
 }
 
+-- deluxe edition for only 490$ extra
 SMODS.Joker {
 	key = 'oil_lamp_deluxe',
 	loc_txt = {
@@ -538,7 +572,87 @@ SMODS.Joker {
 	end
 }
 
--- beyond cracked jokers
+-- i told astro im putting him in this mod so hes now in this mod
+SMODS.Joker {
+	key = 'astro',
+	loc_txt = {
+		name = 'Obligatory Astro Self-insert',
+		text = {
+			'{X:dark_edition,C:white}^^#1#{} Chips when literally anything happens',
+			'{C:inactive}meow{}'
+		}
+	},
+	config = { extra = { eechips = 2 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.eechips } }
+	end,
+	rarity = 'r_cracked',
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 0, y = 1 },
+	cost = 500,
+	calculate = function(self, card, context)
+		if context.before
+		or context.main_scoring
+		or context.pre_joker
+		or context.other_joker
+		or context.post_joker
+		or context.joker_main
+		then
+			return {
+				EEchip_mod = card.ability.extra.eechips,
+				message = '^^' .. card.ability.extra.eechips .. ' Chips',
+            	color = G.C.DARK_EDITION,
+			}
+		end
+	end
+}
+
+
+SMODS.Scoring_Calculation {
+    key = "exponential",
+    func = function(self, chips, mult, flames) return chips ^ mult end,
+    colour = G.C.DARK_EDITION,
+    text = "^"
+}
+
+-- i love increasing the level of the chips/mult operator waow
+SMODS.Joker {
+	key = 'hypus_operatus',
+	loc_txt = {
+		name = 'Hypus Operatus',
+		text = {
+			{
+			"Sets Chips/Mult operator to {X:dark_edition,C:white}^{}",
+			},
+			{
+			"{C:attention}+#1#{} Ante when rerolling the shop"
+			},
+		}
+	},
+	config = { extra = { ante = 1 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.ante } }
+	end,
+	rarity = 'r_cracked',
+	atlas = 'crackedjokers_atlas',
+	pos = { x = 0, y = 0 },
+	soul_pos = { x = 1, y = 0 },
+	cost = 500,
+	add_to_deck = function(self, card, from_debuff)
+		SMODS.set_scoring_calculation("r_exponential")
+	end,
+	remove_from_deck = function(self, card, from_debuff)
+		SMODS.set_scoring_calculation("multiply")
+	end,
+	calculate = function(self, card, context)
+		if context.reroll_shop then
+			ease_ante(card.ability.extra.ante)
+		end
+	end
+}
+
+-- beyond cracked jokers, currently commented out cause. they suck ngl + im kinda starting to realize that having jokers that instantly win runs is Not Very Fun
+
 SMODS.Joker {
 	key = 'funny',
 	loc_txt = {
@@ -595,7 +709,7 @@ SMODS.Joker {
 	end,
 	update = function(self, card, dt)
 		if card.ability.extra.active == true then
-			card.ability.extra.jokers = #G.jokers.cards + 1
+			card.ability.extra.jokers = #G.jokers.cards + G.GAME.joker_buffer
 			card.ability.extra.cards = #G.deck.cards
 		end
 	end,

@@ -6,7 +6,7 @@ SMODS.Atlas {
     px = 71,
     py = 95
 }
-
+--[[
 SMODS.Joker {
 	key = 'incomprehensible_joker',
 	loc_txt = {
@@ -88,7 +88,7 @@ function Card:is_face(from_boss)
     end
     return false
 end
-
+]]
 
 --[[SMODS.Joker {
 	key = 'john_jimbo',
@@ -273,7 +273,7 @@ end
         end
 	end,
 }
-
+]]--
 
 SMODS.Joker {
 	key = 'diamond_joker',
@@ -297,7 +297,6 @@ SMODS.Joker {
 		math.max(G.GAME.dollars, card.ability.extra.maxmoney)
 	end
 }
---]]
 
 SMODS.Joker {
 	key = 'the_incredible_photochud',
@@ -342,13 +341,13 @@ SMODS.Joker {
 	loc_txt = {
 		name = 'Factory',
 		text = {
-			"{C:chips}+#1#!{} Chips and {C:mult}+#2#?{} Mult",
-            "Both values increase by {C:attention}#3#{} at the end of round"
+			"{C:mult}+#2#?{} Mult",
+            "Value increase by {C:attention}#3#{} at the end of round"
 		}
 	},
-	config = { extra = { chips = 1, mult = 1, increase = 1 } },
+	config = { extra = { mult = 1, increase = 1 } },
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.increase } }
+		return { vars = { card.ability.extra.mult, card.ability.extra.increase } }
 	end,
 	rarity = 3,
 	atlas = 'placeholders',
@@ -357,19 +356,13 @@ SMODS.Joker {
     calculate = function(self, card, context)
 		if context.joker_main then
 			return {
-				mult_mod = factorial_iterative_addition(card.ability.extra.mult),
-				message = '+' .. factorial_iterative_addition(card.ability.extra.mult) .. ' Mult',
+				mult_mod = addition_factorial(card.ability.extra.mult),
+				message = '+' .. addition_factorial(card.ability.extra.mult) .. ' Mult',
                 color = G.C.MULT,
-                extra = {
-				    chip_mod = factorial(card.ability.extra.chips),
-				    message = '+' .. factorial(card.ability.extra.chips) .. ' Chips',
-                    color = G.C.CHIPS,
-                }
 			}
 		end
         if (context.end_of_round and context.cardarea == G.jokers) or context.forcetrigger then
             card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.increase
-            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.increase
 			return {
 				message = "Upgraded!",
                 color = G.C.ATTENTION,
@@ -378,18 +371,339 @@ SMODS.Joker {
     end
 }
 
-function factorial(n)
-    if n == 0 then
-        return 1
-    else
-        return n * factorial(n - 1)
+
+-- henry is back
+SMODS.Joker {
+	key = 'heptation_henry',
+	loc_txt = {
+		name = 'heptation henry',
+		text = {
+			"{X:dark_edition,C:edition}^^^^^#1#{} Mult",
+			"{C:inactive}...hey wait a god damn minute this seems familiar{}"
+		}
+	},
+	config = { extra = { EEEEEmult = 1.1 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.EEEEEmult } }
+	end,
+	dependencies = {"cryptposting"},
+	rarity = 'crp_2exomythic4me',
+	atlas = 'placeholders',
+	pos = { x = 10, y = 0 },
+	cost = 500,
+	calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				hypermult_mod = {5, 27},
+				message = '^^^^^' .. card.ability.extra.EEEEEmult .. ' Mult',
+                color = G.C.DARK_EDITION
+			}
+		end
+	end
+}
+
+-- zulu 2
+SMODS.Joker {
+	key = 'zulu_2',
+	loc_txt = {
+		name = 'zulu but better',
+		text = {
+			"{C:valk_prestigious,s:10}+pi Zulu{}",
+		}
+	},
+	config = { extra = { zulu = math.pi } },
+	dependencies = {"vallkarri"},
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.zulu } }
+	end,
+	rarity = 'valk_prestigious',
+	atlas = 'placeholders',
+	pos = { x = 10, y = 0 },
+	cost = 500 * math.pi,
+	calculate = function(self, card, context)
+		if context.joker_main then
+        	G.GAME.zulu = (G.GAME.zulu and G.GAME.zulu+card.ability.extra.zulu) or (math.pi+card.ability.extra.zulu)
+		end
+	end
+}
+
+-- deluxe edition
+SMODS.Joker {
+	key = 'oil_lamp_deluxe',
+	loc_txt = {
+		name = 'Oil Lamp: Deluxe Edition',
+		text = {
+			"Increases values of {C:attention}ALL Jokers{} by {X:attention,C:white}^#1#{}",
+			"at the end of round",
+			"{C:inactive}(Works on itself)"
+		}
+	},
+	config = { extra = { value_increase = 1.2 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.value_increase } }
+	end,
+	dependencies = {"Cryptid"},
+	rarity = 'cry_exotic',
+	atlas = 'placeholders',
+	pos = { x = 10, y = 0 },
+	cost = 50,
+	calculate = function(self, card, context)
+        if (context.end_of_round and context.cardarea == G.jokers) or context.forcetrigger then
+            for i, v in pairs(G.jokers.cards) do
+				Cryptid.manipulate(G.jokers.cards[i], { value = { arrows = 1, height = card.ability.extra.value_increase }, type = "hyper" })
+            end
+			card_eval_status_text(
+				card,
+				"extra",
+				nil,
+				nil,
+				nil,
+				{ message = localize("k_upgrade_ex"), colour = G.C.GREEN }
+			)
+        end
+	end
+}
+
+--[[
+-- im yoinking that thank you
+SMODS.Joker:take_ownership('j_cavendish', {
+	no_pool_flag = 'cavendish_extinct',
+	calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				message = localize { type = 'variable', key = 'a_xmult', vars = { card.ability.extra.Xmult } },
+				Xmult_mod = card.ability.extra.Xmult
+			}
+		end
+		if context.end_of_round and context.game_over == false and not context.repetition and not context.blueprint then
+			if pseudorandom('cavendish') < G.GAME.probabilities.normal / card.ability.extra.odds then
+				G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+				G.GAME.pool_flags.cavendish_extinct = true
+				return {
+					message = 'Extinct!'
+				}
+			else
+				return {
+					message = 'Safe!'
+				}
+			end
+		end
+	end
+})
+
+SMODS.Joker {
+	key = 'grossus_michus',
+	loc_txt = {
+		name = 'Grossus Michus',
+		text = {
+			"{X:dark_edition,C:white}^#1#{} Mult",
+            "{C:green}#2# in #3#{} chance this card is destroyed",
+            "at the end of round",
+		}
+	},
+	config = { extra = { emult = 1.67, destroy_chance = 1000000 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.emult, (G.GAME.probabilities.normal or 1), card.ability.extra.destroy_chance } }
+	end,
+	yes_pool_flag = 'cavendish_extinct',
+	no_pool_flag = 'grossus_michus_extinct',
+	rarity = 1,
+	atlas = 'placeholders',
+	pos = { x = 0, y = 0 },
+	cost = 4,
+    calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				Emult_mod = card.ability.extra.emult,
+				message = '^' .. card.ability.extra.emult .. ' Mult',
+                color = G.C.MULT
+			}
+		end
+		if context.end_of_round and not context.repetition and context.game_over == false and not context.blueprint then
+			if pseudorandom('grossus_michus') < G.GAME.probabilities.normal / card.ability.extra.destroy_chance then
+				G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+				G.GAME.pool_flags.grossus_michus_extinct = true
+				return {
+					message = 'Extinct!'
+				}
+			else
+				return {
+					message = 'Safe!'
+				}
+			end
+			end
     end
+}
+
+SMODS.Joker {
+	key = 'cavendus',
+	loc_txt = {
+		name = 'Cavendus',
+		text = {
+			"{X:dark_edition,C:white}^^#1#{} Mult",
+            "{C:green}#2# in #3#{} chance this card is destroyed",
+            "at the end of round",
+		}
+	},
+	config = { extra = { eemult = 1.067, destroy_chance = 1e10 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.eemult, (G.GAME.probabilities.normal or 1), card.ability.extra.destroy_chance } }
+	end,
+	yes_pool_flag = 'grossus_michus_extinct',
+	no_pool_flag = 'cavendus_extinct',
+	rarity = 1,
+	atlas = 'placeholders',
+	pos = { x = 0, y = 0 },
+	cost = 4,
+    calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				EEmult_mod = card.ability.extra.eemult,
+				message = '^' .. card.ability.extra.eemult .. ' Mult',
+                color = G.C.MULT
+			}
+		end
+		if context.end_of_round and not context.repetition and context.game_over == false and not context.blueprint then
+			if pseudorandom('cavendus') < G.GAME.probabilities.normal / card.ability.extra.destroy_chance then
+				G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+				G.GAME.pool_flags.cavendus_extinct = true
+				return {
+					message = 'Extinct!'
+				}
+			else
+				return {
+					message = 'Safe!'
+				}
+			end
+			end
+    end
+}
+
+SMODS.Joker {
+	key = 'hua_moa',
+	loc_txt = {
+		name = 'Hua Moa',
+		text = {
+			"{C:mult}+#1#{} Mult, {X:mult,C:white}X#2#{} Mult, {X:dark_edition,C:white}^#3#{} Mult, {X:dark_edition,C:white}^^#4#{} Mult",
+			"{C:attention}Cannot go extinct{}"
+		}
+	},
+	config = { extra = { mult = 30, xmult = 6, emult = 2.34, eemult = 1.134 } },
+	loc_vars = function(self, info_queue, card)
+		return { vars = { card.ability.extra.mult, card.ability.extra.xmult, card.ability.extra.emult, card.ability.extra.eemult, (G.GAME.probabilities.normal or 1), card.ability.extra.destroy_chance } }
+	end,
+	yes_pool_flag = 'cavendus_extinct',
+	rarity = 1,
+	atlas = 'placeholders',
+	pos = { x = 0, y = 0 },
+	cost = 4,
+    calculate = function(self, card, context)
+		if context.joker_main then
+			return {
+				mult_mod = card.ability.extra.mult,
+				message = '+' .. card.ability.extra.mult .. ' Mult',
+                color = G.C.MULT,
+                extra = {
+				    Xmult_mod = card.ability.extra.xmult,
+				    message = 'X' .. card.ability.extra.xmult .. ' Mult',
+                    color = G.C.MULT,
+                    extra = {
+				        Emult_mod = card.ability.extra.emult,
+				        message = '^' .. card.ability.extra.emult .. ' Mult',
+                        color = G.C.MULT,
+                        extra = {
+				            EEmult_mod = card.ability.extra.eemult,
+				            message = '^^' .. card.ability.extra.eemult .. ' Mult',
+                            color = G.C.MULT,
+                        }
+                    }
+                }
+			}
+		end
+    end
+}
+]]--
+-- all types of factorials
+function factorial(n)
+    local result = 1
+    for i = 1, n do
+        result = result * i
+    end
+    return result
 end
 
-function factorial_iterative_addition(n)
+function addition_factorial(n)
     local result = 0
     for i = 1, n do
         result = result + i
+    end
+    return result
+end
+
+function exponential_factorial(n)
+    local result = 1
+    for i = 1, n do
+        result = result ^ i
     end
     return result
 end
